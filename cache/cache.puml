@@ -1,0 +1,47 @@
+@startuml cache
+namespace cache {
+    class ByteView << (S,Aquamarine) >> {
+        - b []byte
+
+        + Len() int
+        + ByteSlice() []byte
+        + String() string
+
+    }
+    interface Getter  {
+        + Get(key string) ([]byte, error)
+
+    }
+    class GetterFunc << (S,Aquamarine) >> {
+        + Get(key string) ([]byte, error)
+
+    }
+    class Group << (S,Aquamarine) >> {
+        - name string
+        - getter Getter
+        - mainCache cache
+
+        - load(key string) (ByteView, error)
+        - getLocally(key string) (ByteView, error)
+        - populateCache(key string, value ByteView)
+
+        + Get(key string) (ByteView, error)
+
+    }
+    class cache << (S,Aquamarine) >> {
+        - mu sync.Mutex
+        - lru *lru.Cache
+        - cacheBytes int64
+
+        - add(key string, value ByteView)
+        - get(key string) (ByteView, bool)
+
+    }
+    class cache.GetterFunc << (T, #FF7700) >>  {
+    }
+}
+
+"cache.Getter" <|-- "cache.GetterFunc"
+
+"cache.<font color=blue>func</font>(string) ([]byte, error)" #.. "cache.GetterFunc"
+@enduml
